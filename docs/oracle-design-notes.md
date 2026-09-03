@@ -124,69 +124,77 @@ scoped to `status = 'awaiting'` fails open on the second handler, because
 `onReply` has already advanced the row. The spike's guard had this bug and a
 test caught it. Make the guard status-agnostic.
 
-## A prior exploration, and where it collides
+## The prior exploration, and where it collides
 
-Les worked the mechanic through with an LLM before this repo existed. The
-transcript is a PDF in his Downloads (`fediverse-oracle-2.pdf`, 7pp) — not
-committed here, because it embeds a private conversation URL, and because the
-substance is below. Treat it as exploration, not specification: it was written
-without knowing BotKit's constraints.
+Les worked the mechanic through with an LLM before this repo existed. It is kept
+verbatim as [*oracle-exploration.md*](oracle-exploration.md) — read it, it is
+the fullest statement of what the Oracle is *for*.
 
-It proposes four phases:
+**It is musing out loud, not a spec.** It calls itself "FOP-01" and uses
+RFC-style MUST / MUST NOT, which reads far more settled than it is; that is the
+model's register, not a decision. Everything in it is open to change on
+feasibility grounds, the mechanic included. This section records what happens
+when its proposals meet the framework — not a verdict on any of them.
 
-1. **Invocation** — a public mention that matches an *invocation grammar*.
-2. **Assignment** — the Oracle DMs the seeker someone else's queued question.
-3. **Answer** — the seeker replies within the DM thread.
-4. **Epiphany** — the Oracle publishes that answer as a **public reply
-   attached to the original asker's post**.
+**What it proposes.** The reciprocal gate as the heart of the thing: delivery of
+your answer is *conditioned* on you answering a stranger's question. Around
+that, a pile of ideas that would each otherwise have to be invented — seeding a
+cold start with synthetic questions, one active ticket per actor, a TTL on
+assignments with silent reassignment, mention stripping, structural anonymity
+(the public answer does not credit its author), and an invocation grammar as a
+noise filter. All plausible, none costed.
 
-Ideas in it worth keeping regardless of what the mechanic becomes:
+**What collides.** §4.2 specifies the public answer as `inReplyTo` the original
+question's post ID, and §Phase 4 calls in-thread context a core UX benefit:
+"anyone following the original thread sees the answer appear naturally." That
+question post arrived in an *earlier* delivery, from a different actor, so it is
+exactly the case BotKit cannot serve. The exploration cannot help decide this,
+because it did not know the constraint existed. See the threading gap above.
 
-- **Ceremony as a filter.** An invocation must match roughly
-  `^(?:oh\s+)?(?:great|mighty|wise|omniscient|all-knowing|venerable)?\s*oracle\b[,:\-\s]+(?<query>.+)`.
-  A mention that fails it MUST NOT enqueue a question and MUST NOT get a
-  public reply; it may be dropped silently, or answered with a themed private
-  rejection ("The Oracularity remains silent…"). This is a nice spam gate and
-  it makes the bot feel like a rite rather than an API.
-- **Anonymity is structural, not incidental.** The public answer MUST NOT tag,
-  credit, or link the actor who wrote it. The answer is the Oracle's voice.
-- **Strip mentions from both stored strings.** Otherwise re-posting a question
-  or answer becomes a notification-amplification vector.
-- **Context isolation.** A DM reply must never inherit the public post's
-  `inReplyTo`, or a private answer can leak into a public thread graph.
-- **A TTL on assignments**, so a question handed out and abandoned comes back.
-- Optional extras: an admin approval step before publishing, and an instance
-  blocklist.
+The two constraints do partly cancel: since the answer must not credit its
+author anyway, a standalone post that quotes the question and mentions only the
+original asker loses less than it first appears.
 
-**Phase 4 is exactly the case BotKit cannot do.** The public answer is meant to
-thread under a question post that arrived in an *earlier* delivery — from a
-different seeker, possibly hours ago. That is the threading gap above, and the
-exploration leans on it hard: it calls in-thread context a core UX benefit,
-"anyone following the original thread sees the answer appear naturally."
+**What it corrects in this document.** An earlier draft of these notes said two
+seekers arriving at once "must not receive the same question." The exploration
+argues the opposite, and is probably right: *pool-based over-dispatch* hands the
+same question to several seekers, first answer wins, the rest are stored as
+alternates or dropped. That deliberately relaxes exactly-once, which makes the
+assignment transaction easier rather than harder — it still needs to claim
+atomically, but the claim is per-assignment, not exclusive over the question.
 
-So the first design decision is unavoidable and the exploration cannot help
-with it. Either the epiphany stops being a threaded reply, or `publish()` needs
-an `inReplyTo` upstream. Worth noting the two constraints partly cancel: since
-the answer must not credit its author anyway, a standalone post that quotes the
-question and mentions only the original asker loses less than it first appears.
+**What is obsolete in it.** It proposes "Mastodon Streaming API or raw
+ActivityPub Inbox monitoring" for ingestion, a relational schema with UUID keys,
+and generally assumes you own the federation edge. BotKit owns all of that now.
+Its `questions` / `assignments` tables are still a reasonable starting shape for
+`app.db`, but they are ours to keep, not a port.
+
+**One nice detail that does work.** Phase 1 suggests favouriting the invoking
+post to acknowledge receipt on the seeker's timeline. BotKit supports this —
+`message.like()` — and it happens during the live delivery, so there is no
+threading problem.
 
 ## Open questions
 
-- Does the answer have to thread under the question? That single choice decides
-  between the four options above, and the prior exploration assumes yes.
-- Is the invocation grammar in or out? It is a good filter, but it also means
-  most mentions get no reply, which reads as a broken bot to a first-time user.
-- Does a question nobody answers time out, requeue, or hold forever? The
-  exploration says TTL; nothing here implements one yet.
-- One question per seeker at a time, or many?
-- Does a seeker have to answer before asking again? The original Oracle traded
-  an answer for a question, which is a nice forcing function and also a way to
-  deadlock an empty queue.
-- What seeds an empty queue? The first seeker has nobody else's question to
-  receive.
-- Is the Oracle a resident of this hostel, or its own instance? It is the only
-  bot here with real state; keeping it beside five stateless ones is convenient
-  but not obviously right.
+The exploration settles more than it leaves open. What is genuinely undecided:
+
+- **Does the answer have to thread under the question?** The one decision
+  nothing else can proceed without, and the only one the exploration assumes
+  rather than argues. Everything above is context for it.
+- **Is the invocation grammar in?** It is a good filter, and the friction is
+  arguably the feature — but it means most mentions get no reply at all, which
+  reads as a broken bot to a first-time user. The exploration offers a themed
+  private rejection as the middle path.
+- **Does the synthetic fallback exist?** If no human answers within a couple of
+  hours, the exploration falls back to canned or LLM-generated wisdom. That
+  keeps the loop alive at the cost of the whole premise being human-to-human.
+- **Is over-dispatch worth it at this scale?** It solves starvation for a busy
+  Oracle. With five followers it is machinery for a problem you do not have.
+- **Is the Oracle a resident of this hostel, or its own instance?** It is the
+  only bot here with real state, and the only one that needs an admin surface
+  if answers are ever moderated before publishing.
+- **Karma, proof-of-work, multilingual matching** — all proposed, all deferrable.
+  Named here so they are decisions rather than omissions.
 
 ## Where the evidence lives
 
