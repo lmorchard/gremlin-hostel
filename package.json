@@ -1,0 +1,35 @@
+{
+  "name": "gremlin-hostel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A small hostel for fediverse gremlins, built on BotKit.",
+  "scripts": {
+    "start": "tsx src/instance.ts",
+    "dev": "tsx watch src/instance.ts",
+    "tunnel": "ssh -R ${SISH_SUBDOMAIN:-gremlins}:80:localhost:${PORT:-8080} -p 2222 sish.decafbad.com",
+    "start:tunnel": "BEHIND_PROXY=true tsx src/instance.ts",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "gen-data": "for d in src/bots/*/gen-data.ts; do tsx \"$d\"; done"
+  },
+  "dependencies": {
+    "@fedify/botkit": "^0.5.3",
+    "@fedify/botkit-sqlite": "^0.5.3",
+    "@hono/node-server": "^1.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.10.2",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.68.0"
+  },
+  "engines": { "node": ">=22" }
+}

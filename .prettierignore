@@ -1,0 +1,3 @@
+# Generated corpora: committed, but not worth reformatting.
+src/bots/*/*.data.ts
+src/bots/shrubot/markov.json
