@@ -114,3 +114,19 @@ only way to set `inReplyTo` and it needs the live `Message` from the delivery
 in hand. For a two-phase bot — question now, public answer later — the answer
 has to be a standalone post that mentions the asker, unless BotKit gains an
 `inReplyTo` option on `publish()`.
+
+## License
+
+Copyright (C) 2026 Les Orchard
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the [GNU Affero General Public License](LICENSE) as published by
+the Free Software Foundation, either version 3 of the License, or (at your
+option) any later version. It comes with **no warranty**; see the license for
+details.
+
+AGPL rather than something more permissive because BotKit is AGPL-3.0-only,
+and this is a derivative work of it. Worth knowing what that means in
+practice: the AGPL's network clause means **anyone who runs a modified copy of
+this as a service has to offer their users its source**. If you fork these
+gremlins and host them, publish your fork.

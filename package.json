@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "description": "A small hostel for fediverse gremlins, built on BotKit.",
+  "license": "AGPL-3.0-only",
+  "author": "Les Orchard <me@lmorchard.com>",
   "scripts": {
     "start": "tsx src/instance.ts",
     "dev": "tsx watch src/instance.ts",
@@ -31,5 +33,7 @@
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.68.0"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }
