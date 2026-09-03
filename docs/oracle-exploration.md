@@ -8,11 +8,12 @@ the private conversation URL.
 > **This is thinking out loud, and all of it is open to change on feasibility
 > grounds — including the mechanic itself.**
 >
-> Read past the register. The document titles itself "Specification: Fediverse
-> Oracle Protocol (FOP-01)" and uses RFC-style **MUST** / **MUST NOT**, which
-> reads far more settled than it is. That is the model's voice, not a decision
-> Les made. Nothing here has been ratified, costed, or checked against what
-> BotKit can actually do.
+> Read past the register. Les asked for spec-shaped output on purpose — the
+> "Specification: Fediverse Oracle Protocol (FOP-01)" framing and the RFC-style
+> **MUST** / **MUST NOT** are a device for forcing clarity, and they do earn
+> their keep: the document is far more precise than a loose chat would have
+> been. But precision is not ratification. Nothing here has been agreed,
+> costed, or checked against what BotKit can actually do.
 >
 > Treat every element as a proposal to argue with. Several are already known to
 > be unbuildable as written — see

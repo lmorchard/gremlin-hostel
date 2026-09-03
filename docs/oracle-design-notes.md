@@ -130,10 +130,11 @@ Les worked the mechanic through with an LLM before this repo existed. It is kept
 verbatim as [*oracle-exploration.md*](oracle-exploration.md) — read it, it is
 the fullest statement of what the Oracle is *for*.
 
-**It is musing out loud, not a spec.** It calls itself "FOP-01" and uses
-RFC-style MUST / MUST NOT, which reads far more settled than it is; that is the
-model's register, not a decision. Everything in it is open to change on
-feasibility grounds, the mechanic included. This section records what happens
+**It is musing out loud in a formal register.** The "FOP-01" framing and the
+RFC-style MUST / MUST NOT were asked for deliberately, to force clarity — and
+they work; the thinking is sharper for it. But the formality is a thinking tool,
+not a commitment: everything in it is open to change on feasibility grounds,
+the mechanic included. This section records what happens
 when its proposals meet the framework — not a verdict on any of them.
 
 **What it proposes.** The reciprocal gate as the heart of the thing: delivery of
