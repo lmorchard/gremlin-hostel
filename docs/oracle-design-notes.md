@@ -124,11 +124,60 @@ scoped to `status = 'awaiting'` fails open on the second handler, because
 `onReply` has already advanced the row. The spike's guard had this bug and a
 test caught it. Make the guard status-agnostic.
 
+## A prior exploration, and where it collides
+
+Les worked the mechanic through with an LLM before this repo existed. The
+transcript is a PDF in his Downloads (`fediverse-oracle-2.pdf`, 7pp) — not
+committed here, because it embeds a private conversation URL, and because the
+substance is below. Treat it as exploration, not specification: it was written
+without knowing BotKit's constraints.
+
+It proposes four phases:
+
+1. **Invocation** — a public mention that matches an *invocation grammar*.
+2. **Assignment** — the Oracle DMs the seeker someone else's queued question.
+3. **Answer** — the seeker replies within the DM thread.
+4. **Epiphany** — the Oracle publishes that answer as a **public reply
+   attached to the original asker's post**.
+
+Ideas in it worth keeping regardless of what the mechanic becomes:
+
+- **Ceremony as a filter.** An invocation must match roughly
+  `^(?:oh\s+)?(?:great|mighty|wise|omniscient|all-knowing|venerable)?\s*oracle\b[,:\-\s]+(?<query>.+)`.
+  A mention that fails it MUST NOT enqueue a question and MUST NOT get a
+  public reply; it may be dropped silently, or answered with a themed private
+  rejection ("The Oracularity remains silent…"). This is a nice spam gate and
+  it makes the bot feel like a rite rather than an API.
+- **Anonymity is structural, not incidental.** The public answer MUST NOT tag,
+  credit, or link the actor who wrote it. The answer is the Oracle's voice.
+- **Strip mentions from both stored strings.** Otherwise re-posting a question
+  or answer becomes a notification-amplification vector.
+- **Context isolation.** A DM reply must never inherit the public post's
+  `inReplyTo`, or a private answer can leak into a public thread graph.
+- **A TTL on assignments**, so a question handed out and abandoned comes back.
+- Optional extras: an admin approval step before publishing, and an instance
+  blocklist.
+
+**Phase 4 is exactly the case BotKit cannot do.** The public answer is meant to
+thread under a question post that arrived in an *earlier* delivery — from a
+different seeker, possibly hours ago. That is the threading gap above, and the
+exploration leans on it hard: it calls in-thread context a core UX benefit,
+"anyone following the original thread sees the answer appear naturally."
+
+So the first design decision is unavoidable and the exploration cannot help
+with it. Either the epiphany stops being a threaded reply, or `publish()` needs
+an `inReplyTo` upstream. Worth noting the two constraints partly cancel: since
+the answer must not credit its author anyway, a standalone post that quotes the
+question and mentions only the original asker loses less than it first appears.
+
 ## Open questions
 
 - Does the answer have to thread under the question? That single choice decides
-  between the four options above.
-- What happens to a question nobody answers? Time out, requeue, or hold forever.
+  between the four options above, and the prior exploration assumes yes.
+- Is the invocation grammar in or out? It is a good filter, but it also means
+  most mentions get no reply, which reads as a broken bot to a first-time user.
+- Does a question nobody answers time out, requeue, or hold forever? The
+  exploration says TTL; nothing here implements one yet.
 - One question per seeker at a time, or many?
 - Does a seeker have to answer before asking again? The original Oracle traded
   an answer for a question, which is a nice forcing function and also a way to
