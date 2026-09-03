@@ -108,8 +108,10 @@ The Oracle. This repo is the roster extracted from an earlier hand-rolled
 Fedify stack; the Oracle bot that project was named for is being redesigned
 rather than ported.
 
-One BotKit constraint shapes that design: **a bot cannot publish a reply
-threaded under a message from an earlier delivery.** `message.reply()` is the
+The constraints that shape that design are written up in
+[*docs/oracle-design-notes.md*](docs/oracle-design-notes.md). The sharpest one:
+**a bot cannot publish a reply threaded under a message from an earlier
+delivery.** `message.reply()` is the
 only way to set `inReplyTo` and it needs the live `Message` from the delivery
 in hand. For a two-phase bot — question now, public answer later — the answer
 has to be a standalone post that mentions the asker, unless BotKit gains an
